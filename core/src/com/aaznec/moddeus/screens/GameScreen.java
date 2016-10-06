@@ -73,6 +73,7 @@ public class GameScreen extends AbstractScreen{
             }
         }
         
+        //I could put this in the above loop but I think clarity is more important than a tiny performance bonus
         for(int x = 0; x <= spawns.getWidth(); x++){    //spawn entities from the map into the game
             for(int y = 0; y <= spawns.getWidth(); y++){
                 Cell cell = spawns.getCell(x, y);

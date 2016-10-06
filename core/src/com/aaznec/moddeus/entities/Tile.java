@@ -3,9 +3,7 @@
  */
 package com.aaznec.moddeus.entities;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
-import com.badlogic.gdx.math.Vector2;
 
 /**
  *

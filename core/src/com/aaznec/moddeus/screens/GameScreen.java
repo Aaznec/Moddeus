@@ -26,11 +26,12 @@ import java.util.ArrayList;
  */
 public class GameScreen extends AbstractScreen{
     
-    //Entities cannot be removed mid-frame, so pre and dead lists are needed
+    //Entities cannot be removed mid-frame due to nullpointer exceptions and physics bodies,
+    //so pre and dead lists are needed
     public ArrayList<Entity> preEntList; //Entities to be added to entList
     public ArrayList<Entity> entList; //List containing all current entities in the game
     public ArrayList<Entity> deadEntList; //Entities to be removed from entList
-    public ArrayList<DrawableEntity> drawList;
+    public ArrayList<DrawableEntity> drawList; //Entities to be drawn
     
     String levelname; //Level to be loaded
     TiledMap map; //Stores the loaded level
@@ -67,7 +68,16 @@ public class GameScreen extends AbstractScreen{
             for(int y = 0; y <= ground.getHeight(); y++){       
                 Cell cell = ground.getCell(x, y);
                 if(cell != null){
-                    preEntList.add(new Tile(x, y, cell));       //Tiles will be added to entList in the next frame
+                    addEnt(new Tile(x, y, cell));       //Tiles will be added to entList in the next frame
+                }
+            }
+        }
+        
+        for(int x = 0; x <= spawns.getWidth(); x++){    //spawn entities from the map into the game
+            for(int y = 0; y <= spawns.getWidth(); y++){
+                Cell cell = spawns.getCell(x, y);
+                if(cell != null){
+                    spawnEnt((String) cell.getTile().getProperties().get("name"), x, y);
                 }
             }
         }
@@ -96,18 +106,57 @@ public class GameScreen extends AbstractScreen{
         delta *= timeScale; //Scale time (if we want slow motion or to pause)
         
         Gdx.gl.glClearColor(0.8f, 0.8f, 1f, 1); //Clear the screen to a light blue
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // ^
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); //
         
-        batch.begin();
-        
-        renderer.renderTileLayer(background);
-        renderer.renderTileLayer(ground);
-        
-        for(DrawableEntity e : drawList){
-            batch.draw(e.getFrame(), e.x, e.pos, 0, 0, e.width, e.height, 1, 1, e.rot);
+        worldTime += delta;
+        while(worldTime > worldStep){       //Step physics how ever many times it needs to be
+            world.step(worldStep, 6, 2);    //6 and 2 are recommended by documentation as position and velocity iterations 
+            worldTime -= delta;             // I haven't read into what they do properly or why those vals are default
         }
         
+        renderer.setView(cam);              
+        cam.update();                       //Update cam pos
+        
+        //UPDATING ENTITIES
+        for(Entity e : entList){            //Cycle through all active ents and update
+            e.update(delta);
+        }
+        
+        //BEGIN DRAWING
+        batch.begin();
+        
+        renderer.renderTileLayer(background); //Render background
+        renderer.renderTileLayer(ground); //Render ground
+        
+        for(DrawableEntity e : drawList){ //Draw every active drawable entity
+            batch.draw(e.getFrame(), e.pos.x, e.pos.y, 0, 0, e.width, e.height, 1, 1, e.rot);
+        }
+        
+        renderer.renderTileLayer(foreground); //render overlay
+        
+        //DRAW UI
+        
         batch.end();
+        //FINISH DRAWING
+        
+        
+        // ADDING/REMOVING ENTITIES
+        for(Entity e : preEntList){
+            entList.add(e);
+            if(e instanceof DrawableEntity){
+                drawList.add( (DrawableEntity) e);
+            }
+        }
+        preEntList.clear();
+        
+        for(Entity e : deadEntList){
+            entList.remove(e);
+            if(e instanceof DrawableEntity){
+                drawList.remove(e);
+            }
+        }
+        deadEntList.clear();
+        //CHANGING ENTS FINISHED
     }
 
     @Override
@@ -128,6 +177,25 @@ public class GameScreen extends AbstractScreen{
 
     @Override
     public void dispose() {
+    }
+    
+   //END SCREEN FUNCTIONS
+    
+    public void addEnt(Entity e){
+        preEntList.add(e);
+    }
+    
+    public void delEnt(Entity e){
+        deadEntList.add(e);
+    }
+    
+    public void spawnEnt(String s, float x, float y){
+        //Im forced to use a massive condition chain here as this java version doesnt support strings in switches... seriously!?
+        if(s == "snail"){
+            //addEnt(new Snail)
+        }else{
+            System.out.println(s + " doesn't exist as an entity!");
+        }
     }
     
 }

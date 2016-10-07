@@ -57,7 +57,7 @@ public class GameScreen extends AbstractScreen{
         deadEntList = new ArrayList<Entity>();
         drawList = new ArrayList<DrawableEntity>();
         
-        map = new TmxMapLoader().load(levelname + ".tmx"); //Load in map
+        map = new TmxMapLoader().load("level/" + levelname + ".tmx"); //Load in map
         
         background = (TiledMapTileLayer) map.getLayers().get("background"); //Render before anything else
         ground = (TiledMapTileLayer) map.getLayers().get("ground"); //Physical (with box2d bodies) layer rendered before entities
@@ -68,7 +68,7 @@ public class GameScreen extends AbstractScreen{
             for(int y = 0; y <= ground.getHeight(); y++){       
                 Cell cell = ground.getCell(x, y);
                 if(cell != null){
-                    addEnt(new Tile(x, y, cell));       //Tiles will be added to entList in the next frame
+                    addEnt(new Tile(x, y, cell, this));       //Tiles will be added to entList in the next frame
                 }
             }
         }
@@ -106,7 +106,7 @@ public class GameScreen extends AbstractScreen{
         
         delta *= timeScale; //Scale time (if we want slow motion or to pause)
         
-        Gdx.gl.glClearColor(0.8f, 0.8f, 1f, 1); //Clear the screen to a light blue
+        Gdx.gl.glClearColor(0.15f, 0.15f, 0.2f, 1); //Clear the screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); //
         
         worldTime += delta;

@@ -7,6 +7,6 @@ package com.aaznec.moddeus.entities;
  *
  * @author Aaznec
  */
-public class Player {
+public class Player{
     
 }

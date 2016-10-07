@@ -3,6 +3,7 @@
  */
 package com.aaznec.moddeus.entities;
 
+import com.aaznec.moddeus.screens.GameScreen;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
@@ -27,7 +28,8 @@ public abstract class DrawableEntity extends Entity{
     float dir;
     public float rot;
     
-    public DrawableEntity(Vector2 pos, float width, float height, float dir) {
+    public DrawableEntity(Vector2 pos, float width, float height, float dir, GameScreen gameState) {
+        super(gameState);
         this.pos = pos;
         this.width = width;
         this.height = height;

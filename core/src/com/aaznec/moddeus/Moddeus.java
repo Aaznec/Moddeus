@@ -15,5 +15,11 @@ public class Moddeus extends Game {
         font = new BitmapFont();
         setScreen(new MenuScreen(this)); //Initialise the game to the menuscreen and pass a ref to itself.
     }
-	
+    
+    @Override
+    public void dispose(){
+        batch.dispose();
+        font.dispose();
+        super.dispose();
+    }
 }

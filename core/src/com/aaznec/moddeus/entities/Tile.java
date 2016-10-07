@@ -3,6 +3,7 @@
  */
 package com.aaznec.moddeus.entities;
 
+import com.aaznec.moddeus.screens.GameScreen;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 
 /**
@@ -13,7 +14,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 //I realise that implementing Tile as an entity is kinda hacky and that I'm adding
 public class Tile extends Entity implements PhysEntity{
     
-    public Tile(float x, float y, Cell cell){
+    public Tile(float x, float y, Cell cell, GameScreen gameState){
+        super(gameState);
         //to be created, just made this so I didn't get errors while writing GameScreen
     }
 

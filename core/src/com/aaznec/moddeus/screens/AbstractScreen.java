@@ -16,4 +16,9 @@ public abstract class AbstractScreen implements Screen{
     public AbstractScreen(Moddeus game){ 
         this.game = game;
     }
+    
+    @Override
+    public void dispose(){
+        game.assets.clear();
+    }
 }

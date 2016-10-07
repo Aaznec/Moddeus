@@ -3,6 +3,7 @@
  */
 package com.aaznec.moddeus.screens;
 
+import com.aaznec.moddeus.Button;
 import com.aaznec.moddeus.Moddeus;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -14,10 +15,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
  * @author Aaznec
  */
 
-/* This menu is almost fully hard coded and I'm sorry about that. 
-    its a really small menu and hacking it together was easier than
-    doing it nicely and having it messing doesnt affect anything 
-    else so i just did it this way..*/
 public class MenuScreen extends AbstractScreen{
       
     Texture buttonImg;
@@ -26,48 +23,46 @@ public class MenuScreen extends AbstractScreen{
     float width;
     float height;
     
-    float tWidth;
-    float tHeight;
-    float tX;
-    float tY;
+    Button playButton;
+    Button settingsButton;
+    Button exitButton;
     
-    float pWidth;
-    float pHeight;
-    float pX;
-    float pY;
-    
-    float sY;
-    
-    float eY;
-    
-    GlyphLayout layout;
+    float titleWidth;
+    float titleHeight;
+    float titleX;
+    float titleY;
     
     public MenuScreen(Moddeus game) {
         super(game);
-        titleImg = new Texture("img/title.png");
-        buttonImg = new Texture("img/button.png");
+        
+        //LOAD ASSETS
+        game.assets.load("img/title.png", Texture.class);
+        game.assets.load("img/button.png", Texture.class);
+        game.assets.finishLoading();
+        
+        titleImg = game.assets.get("img/title.png");
+        buttonImg = game.assets.get("img/button.png");
+        
+        width = Gdx.graphics.getWidth();
+        height = Gdx.graphics.getHeight();
     }
 
     @Override
     public void show() {
-        width = Gdx.graphics.getWidth();
-        height = Gdx.graphics.getHeight();
         
-        //Title image vars
-        tWidth = width * 0.75f;
-        tHeight = tWidth/titleImg.getWidth() * titleImg.getHeight();
-        tX = width/2 - tWidth/2;
-        tY = height/2 - tHeight/2 + 0.25f * height;
+        titleWidth = width * 0.75f;
+        titleHeight = titleWidth/titleImg.getWidth() * titleImg.getHeight();
+        titleX = width/2 - titleWidth/2;
+        titleY = height/2 - titleHeight/2 + 0.25f * height;
         
-        //Play button image vars
-        pWidth = width/6;
-        pHeight = height/12;
-        pX = width/2 - pWidth/2;
-        pY = tY - pHeight - height/30;
-        //Settings button image vars
-        sY = pY - pHeight - height/30;
-        //Exit button image vars
-        eY = sY - pHeight - height/30;
+        float buttonWidth = width/6;
+        float buttonHeight = height/12;
+        
+        playButton = new Button( width/2 , titleY - buttonHeight - height/30, buttonWidth, buttonHeight); //Make each button a little bit bellow the above element
+        settingsButton = new Button(width/2, playButton.y - buttonHeight - height/30, buttonWidth, buttonHeight);
+        exitButton = new Button(width/2, settingsButton.y - buttonHeight - height/30, buttonWidth, buttonHeight);
+
+        
     }
 
     @Override
@@ -79,35 +74,30 @@ public class MenuScreen extends AbstractScreen{
         //BEGIN DRAWING
         game.batch.begin();
         
-        //DRAW TITLE AND BUTTONS
-        game.batch.draw(titleImg, tX, tY, tWidth, tHeight); //Position the title so its centered X and 30% up from centre on Y
-        game.batch.draw(buttonImg, pX, pY, pWidth, pHeight); //Draw the buttons a small distance below the previous element
-        game.batch.draw(buttonImg, pX, sY, pWidth, pHeight);
-        game.batch.draw(buttonImg, pX, eY, pWidth, pHeight);
-        //DRAW TEXT
-        layout = new GlyphLayout(game.font, "Play");
-        game.font.draw(game.batch, "Play", pX + pWidth/2 - layout.width/2, pY + pHeight/2 + layout.height/2); //Center the text on the buttons
-        layout.setText(game.font, "Settings");
-        game.font.draw(game.batch, "Settings", pX + pWidth/2 - layout.width/2, sY + pHeight/2 + layout.height/2);
-        layout.setText(game.font, "Exit");
-        game.font.draw(game.batch, "Exit", pX + pWidth/2 - layout.width/2, eY + pHeight/2 + layout.height/2);
+        game.batch.draw(titleImg, titleX, titleY, titleWidth, titleHeight);
+        
+        playButton.draw(game, buttonImg);
+        settingsButton.draw(game, buttonImg);
+        exitButton.draw(game, buttonImg);
+        
+        playButton.drawText(game, "Play");
+        settingsButton.drawText(game, "Settings");
+        exitButton.drawText(game, "Exit");
+        
         game.batch.end();
         
-        //CHECK BUTTONS
-        if(Gdx.input.isTouched()){
-            float x = Gdx.input.getX();
-            float y = height - Gdx.input.getY();
-            System.out.println(x + "," + y);
-            if( x > pX && x < pX + pWidth){
-                if(y > pY && y < pY + pHeight){
-                    game.setScreen(new LevelScreen(game));
-                }
-                if(y > sY && y < sY + pHeight){
-                    game.setScreen(new SettingsScreen(game));
-                }
-                if(y > eY && y < eY + pHeight){
-                    Gdx.app.exit();
-                }
+        if(Gdx.input.justTouched()){
+            float px = Gdx.input.getX();
+            float py = height - Gdx.input.getY(); //Touch coords are y-down and i use y-up
+
+            if(playButton.isInside(px, py)){
+                game.setScreen(new LevelScreen(game));
+            }
+            if(settingsButton.isInside(px, py)){
+                game.setScreen(new SettingsScreen(game));
+            }
+            if(exitButton.isInside(px, py)){
+                Gdx.app.exit();
             }
         }
         
@@ -115,6 +105,8 @@ public class MenuScreen extends AbstractScreen{
 
     @Override
     public void resize(int width, int height) {
+        this.width = width;
+        this.height = height;
         show();
     }
 
@@ -128,10 +120,5 @@ public class MenuScreen extends AbstractScreen{
 
     @Override
     public void hide() {
-    }
-
-    @Override
-    public void dispose() {
-    }
-    
+    } 
 }

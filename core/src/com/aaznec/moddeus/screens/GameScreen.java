@@ -6,8 +6,11 @@ package com.aaznec.moddeus.screens;
 import com.aaznec.moddeus.Moddeus;
 import com.aaznec.moddeus.entities.DrawableEntity;
 import com.aaznec.moddeus.entities.Entity;
+import com.aaznec.moddeus.entities.Player;
 import com.aaznec.moddeus.entities.Tile;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -17,6 +20,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 
@@ -25,6 +29,11 @@ import java.util.ArrayList;
  * @author Aaznec
  */
 public class GameScreen extends AbstractScreen{
+    
+    //Phys vars
+    public World world; //Physics context
+    float worldTime;    //Accumulator for how many physics steps are due
+    final float worldStep; //Fixed time step for physics
     
     //Entities cannot be removed mid-frame due to nullpointer exceptions and physics bodies,
     //so pre and dead lists are needed
@@ -38,19 +47,24 @@ public class GameScreen extends AbstractScreen{
     TiledMapTileLayer background, ground, foreground, spawns; //Seperate layers
     OrthogonalTiledMapRenderer renderer; //Renderer for tile map and entities
     
-    public World world; //Physics context
-    float worldTime;    //Accumulator for how many physics steps are due
-    final float worldStep; //Fixed time step for physics
-    
     float timeScale; //To slow down time
     
     Batch batch; //Render batch
     
     OrthographicCamera cam;
     
+    //DEBUG
+    Box2DDebugRenderer debug;
+    boolean debugOn;
+    
     public GameScreen(Moddeus game, String levelname) {
         super(game);
         this.levelname = levelname;
+        
+        world = new World(new Vector2(0, -10), true); //Init physics with gravity of 10N down
+        worldTime = 0;
+        worldStep = 1/300f; //Step forward physics sim at increments of 1/300 of a second
+        
         
         preEntList = new ArrayList<Entity>(); //Init ent lists
         entList = new ArrayList<Entity>();
@@ -78,23 +92,23 @@ public class GameScreen extends AbstractScreen{
             for(int y = 0; y <= spawns.getWidth(); y++){
                 Cell cell = spawns.getCell(x, y);
                 if(cell != null){
-                    spawnEnt((String) cell.getTile().getProperties().get("name"), x, y);
+                    spawnEnt((String) cell.getTile().getProperties().get("type"), x, y);
                 }
             }
         }
         
         renderer = new OrthogonalTiledMapRenderer(map, 1/16f); //Set to render map and set units to 1 unit = 16px
-        
-        world = new World(new Vector2(0, -10), true); //Init physics with gravity of 10N down
-        worldTime = 0;
-        worldStep = 1/300f; //Step forward physics sim at increments of 1/300 of a second
-        
+      
         timeScale = 1; //We just want normal time to start.
         
         batch = renderer.getBatch(); //Init drawing batch
         
         cam = new OrthographicCamera();
         cam.setToOrtho(false, 16, 9);
+        
+        //DEBUG
+        debug = new Box2DDebugRenderer();
+        debugOn = false;
     }
 
     @Override
@@ -128,9 +142,11 @@ public class GameScreen extends AbstractScreen{
         
         renderer.renderTileLayer(background); //Render background
         renderer.renderTileLayer(ground); //Render ground
+        renderer.renderTileLayer(spawns); //TESTING
         
         for(DrawableEntity e : drawList){ //Draw every active drawable entity
             batch.draw(e.getFrame(), e.pos.x, e.pos.y, 0, 0, e.width, e.height, 1, 1, e.rot);
+           // System.out.println("Drawing " + e.toString());//TESTING
         }
         
         renderer.renderTileLayer(foreground); //render overlay
@@ -158,6 +174,14 @@ public class GameScreen extends AbstractScreen{
         }
         deadEntList.clear();
         //CHANGING ENTS FINISHED
+        
+        //DEBUG
+        if(Gdx.input.isKeyJustPressed(Keys.B)){
+            debugOn = !debugOn;
+        }
+        if(debugOn){
+            debug.render(world, cam.combined);
+        }
     }
 
     @Override
@@ -191,11 +215,11 @@ public class GameScreen extends AbstractScreen{
     }
     
     public void spawnEnt(String s, float x, float y){
-        //Im forced to use a massive condition chain here as this java version doesnt support strings in switches... seriously!?
-        if(s == "snail"){
-            //addEnt(new Snail)
+        //Im forced to use a massive condition chain here as this java version doesnt support strings in switches... seriously java!?
+        if(s.equalsIgnoreCase("player")){ //For some reason == wasn't working here... i dont know why
+            addEnt(new Player(new Vector2(x,y), this));
         }else{
-            System.out.println(s + " doesn't exist as an entity!");
+            System.out.println( "'" + s + "'" + " doesn't exist as an entity!");
         }
     }
     

@@ -19,6 +19,8 @@ public abstract class Entity {
         this.gameState = gameState;
     }
     
-    public abstract void update(float delta);
+    public void update(float delta){
+        stateTime += delta;
+    }
     
 }

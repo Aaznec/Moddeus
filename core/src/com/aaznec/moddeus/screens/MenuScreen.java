@@ -13,6 +13,11 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
  *
  * @author Aaznec
  */
+
+/* This menu is almost fully hard coded and I'm sorry about that. 
+    its a really small menu and hacking it together was easier than
+    doing it nicely and having it messing doesnt affect anything 
+    else so i just did it this way..*/
 public class MenuScreen extends AbstractScreen{
       
     Texture buttonImg;

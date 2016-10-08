@@ -15,7 +15,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
  */
 public abstract class Mob extends DrawableEntity implements PhysEntity{
     
-    Body body;
+    public Body body;
+    public float acc;
+    public float maxSpeed;
     int health;
     
     public Mob(Vector2 pos, float width, float height, float dir, GameScreen gameState) {
@@ -41,6 +43,16 @@ public abstract class Mob extends DrawableEntity implements PhysEntity{
     public void update(float delta){
         super.update(delta);
         pos = body.getPosition();
+        
+    }
+    
+    public void clampVel(){
+        Vector2 vel = body.getLinearVelocity();
+        if(vel.x > maxSpeed){
+            body.setLinearVelocity(maxSpeed, vel.y);
+        } else if(vel.x < -maxSpeed){
+            body.setLinearVelocity(-maxSpeed, vel.y);
+        }
     }
     
 }

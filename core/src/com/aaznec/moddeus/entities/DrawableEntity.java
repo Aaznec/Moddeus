@@ -25,7 +25,7 @@ public abstract class DrawableEntity extends Entity{
     public Vector2 pos;
     public float width;
     public float height;
-    float dir;
+    public float dir;
     public float rot;
     
     public DrawableEntity(Vector2 pos, float width, float height, float dir, GameScreen gameState) {

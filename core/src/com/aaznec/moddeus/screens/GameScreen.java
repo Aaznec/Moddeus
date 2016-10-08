@@ -9,7 +9,6 @@ import com.aaznec.moddeus.entities.Entity;
 import com.aaznec.moddeus.entities.Player;
 import com.aaznec.moddeus.entities.Tile;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -52,6 +51,8 @@ public class GameScreen extends AbstractScreen{
     Batch batch; //Render batch
     
     OrthographicCamera cam;
+    
+    public Player player;
     
     //DEBUG
     Box2DDebugRenderer debug;
@@ -105,6 +106,13 @@ public class GameScreen extends AbstractScreen{
         
         cam = new OrthographicCamera();
         cam.setToOrtho(false, 16, 9);
+        
+        for(Entity e : preEntList){ //Find the player on this level
+            if(e instanceof Player){
+                player = (Player) e;
+            }
+        }
+        
         
         //DEBUG
         debug = new Box2DDebugRenderer();
@@ -202,6 +210,8 @@ public class GameScreen extends AbstractScreen{
 
     @Override
     public void dispose() {
+        super.dispose();
+        Gdx.input.setInputProcessor(null);
     }
     
    //END SCREEN FUNCTIONS
